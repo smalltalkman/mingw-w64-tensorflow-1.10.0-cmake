@@ -1,0 +1,10 @@
+--- tensorflow-1.10.0.orig/tensorflow/__init__.py	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/__init__.py	2019-01-27 22:11:28.777602200 +0800
+@@ -28,6 +28,7 @@
+ del LazyLoader
+ 
+ from tensorflow.python.platform import flags  # pylint: disable=g-import-not-at-top
++from tensorflow.python.platform import app  # pylint: disable=g-import-not-at-top
+ app.flags = flags  # pylint: disable=undefined-variable
+ 
+ del absolute_import

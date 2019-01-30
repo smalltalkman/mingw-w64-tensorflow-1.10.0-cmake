@@ -1,0 +1,14 @@
+post_install() {
+  cd mingw64
+  local _prefix=$(pwd -W)
+  cd -
+  local _it
+  for _it in freeze_graph3 saved_model_cli3 tensorboard3 tflite_convert3 toco3 toco_from_protos3 ; do
+    sed -e "s|/mingw64|${_prefix}|g" \
+        -i mingw64/bin/${_it}-script.py
+  done
+}
+
+post_upgrade() {
+  post_install
+}

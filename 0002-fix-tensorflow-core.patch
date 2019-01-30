@@ -1,0 +1,106 @@
+diff -ur -x '*.orig' tensorflow-1.10.0.orig/tensorflow/core/common_runtime/pool_allocator.cc tensorflow-1.10.0/tensorflow/core/common_runtime/pool_allocator.cc
+--- tensorflow-1.10.0.orig/tensorflow/core/common_runtime/pool_allocator.cc	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/core/common_runtime/pool_allocator.cc	2019-01-29 19:40:27.839602200 +0800
+@@ -16,7 +16,7 @@
+ #include "tensorflow/core/common_runtime/pool_allocator.h"
+ 
+ #include <errno.h>
+-#ifndef _MSC_VER
++#ifndef _WIN32
+ #include <strings.h>
+ #include <sys/mman.h>  // for munmap
+ #endif
+diff -ur -x '*.orig' tensorflow-1.10.0.orig/tensorflow/core/grappler/clusters/single_machine.cc tensorflow-1.10.0/tensorflow/core/grappler/clusters/single_machine.cc
+--- tensorflow-1.10.0.orig/tensorflow/core/grappler/clusters/single_machine.cc	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/core/grappler/clusters/single_machine.cc	2019-01-29 19:40:27.847602200 +0800
+@@ -33,6 +33,10 @@
+ #include "tensorflow/core/platform/types.h"
+ #include "tensorflow/core/public/session.h"
+ 
++#ifdef __MINGW32__
++#include <unistd.h>
++#endif
++
+ namespace tensorflow {
+ namespace grappler {
+ 
+diff -ur -x '*.orig' tensorflow-1.10.0.orig/tensorflow/core/lib/random/random.cc tensorflow-1.10.0/tensorflow/core/lib/random/random.cc
+--- tensorflow-1.10.0.orig/tensorflow/core/lib/random/random.cc	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/core/lib/random/random.cc	2019-01-30 10:14:28.334602200 +0800
+@@ -24,7 +24,11 @@
+ 
+ namespace {
+ std::mt19937_64* InitRngWithRandomSeed() {
++#ifdef __MINGW32__
++  std::random_device device;
++#else
+   std::random_device device("/dev/urandom");
++#endif
+   return new std::mt19937_64(device());
+ }
+ std::mt19937_64 InitRngWithDefaultSeed() { return std::mt19937_64(); }
+diff -ur -x '*.orig' tensorflow-1.10.0.orig/tensorflow/core/platform/cpu_info.cc tensorflow-1.10.0/tensorflow/core/platform/cpu_info.cc
+--- tensorflow-1.10.0.orig/tensorflow/core/platform/cpu_info.cc	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/core/platform/cpu_info.cc	2019-01-29 19:40:27.856602200 +0800
+@@ -20,6 +20,10 @@
+ #if defined(PLATFORM_IS_X86)
+ #include <mutex>  // NOLINT
+ #endif
++#ifdef _WIN32
++#include <intrin.h>
++#include <immintrin.h>
++#endif
+ 
+ // SIMD extension querying is only available on x86.
+ #ifdef PLATFORM_IS_X86
+@@ -55,7 +59,7 @@
+ 
+ CPUIDInfo *cpuid = nullptr;
+ 
+-#ifdef PLATFORM_WINDOWS
++#if PLATFORM_WINDOWS && defined(_MSC_VER)
+ // Visual Studio defines a builtin function, so use that if possible.
+ int GetXCR0EAX() { return _xgetbv(0); }
+ #else
+diff -ur -x '*.orig' tensorflow-1.10.0.orig/tensorflow/core/platform/windows/env_time.cc tensorflow-1.10.0/tensorflow/core/platform/windows/env_time.cc
+--- tensorflow-1.10.0.orig/tensorflow/core/platform/windows/env_time.cc	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/core/platform/windows/env_time.cc	2019-01-29 19:40:27.862602200 +0800
+@@ -44,7 +44,7 @@
+       // versions of Windows, so we need to check for its existence here.
+       // All std::chrono clocks on Windows proved to return
+       // values that may repeat, which is not good enough for some uses.
+-      constexpr int64_t kUnixEpochStartTicks = 116444736000000000i64;
++      constexpr int64_t kUnixEpochStartTicks = 116444736000000000LL;
+       constexpr int64_t kFtToMicroSec = 10;
+ 
+       // This interface needs to return system time and not
+diff -ur -x '*.orig' tensorflow-1.10.0.orig/tensorflow/core/platform/windows/windows_file_system.cc tensorflow-1.10.0/tensorflow/core/platform/windows/windows_file_system.cc
+--- tensorflow-1.10.0.orig/tensorflow/core/platform/windows/windows_file_system.cc	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/core/platform/windows/windows_file_system.cc	2019-01-29 19:40:27.868602200 +0800
+@@ -486,6 +486,12 @@
+   return result;
+ }
+ 
++#ifdef __MINGW32__
++Status WindowsFileSystem::CopyFile(const string& src, const string& target) {
++  return FileSystemCopyFile(this, src, this, target);
++}
++#endif
++
+ Status WindowsFileSystem::GetMatchingPaths(const string& pattern,
+                                            std::vector<string>* results) {
+   // NOTE(mrry): The existing implementation of FileSystem::GetMatchingPaths()
+diff -ur -x '*.orig' tensorflow-1.10.0.orig/tensorflow/core/platform/windows/windows_file_system.h tensorflow-1.10.0/tensorflow/core/platform/windows/windows_file_system.h
+--- tensorflow-1.10.0.orig/tensorflow/core/platform/windows/windows_file_system.h	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/core/platform/windows/windows_file_system.h	2019-01-29 19:40:27.875602200 +0800
+@@ -63,6 +63,10 @@
+ 
+   Status RenameFile(const string& src, const string& target) override;
+ 
++#ifdef __MINGW32__
++  Status CopyFile(const string& src, const string& target);
++#endif
++
+   string TranslateName(const string& name) const override { return name; }
+ };
+ 

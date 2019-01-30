@@ -1,0 +1,18 @@
+--- nsync.orig/platform/win32/platform_c++11_os.h	2019-01-26 18:18:26.162602200 +0800
++++ nsync/platform/win32/platform_c++11_os.h	2019-01-26 18:18:33.630602200 +0800
+@@ -28,6 +28,7 @@
+ int clock_gettime (clockid_t clk_id, struct timespec *tp);
+ NSYNC_CPP_END_
+ 
++#ifdef _MSC_VER
+ /* Avoid deprecation/safety warning for tmpfile().
+    This is used for the C++11 build.   The copy in
+    win32/platform.h is used for the win32 "native" build. */
+@@ -39,6 +40,7 @@
+         }
+         return (fp);
+ }
++#endif
+ 
+ /* Windows lacks pthread_key_t. */
+ #include "Windows.h"

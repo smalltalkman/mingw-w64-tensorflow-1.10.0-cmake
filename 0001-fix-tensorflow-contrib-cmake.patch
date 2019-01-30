@@ -1,0 +1,690 @@
+diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/CMakeLists.txt tensorflow-1.10.0/tensorflow/contrib/cmake/CMakeLists.txt
+--- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/CMakeLists.txt	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/CMakeLists.txt	2019-01-29 19:40:27.631602200 +0800
+@@ -149,6 +149,7 @@
+   add_definitions(-DWIN32 -DOS_WIN -D_MBCS -DWIN32_LEAN_AND_MEAN -DNOGDI -DPLATFORM_WINDOWS)
+   add_definitions(-DTENSORFLOW_USE_EIGEN_THREADPOOL -DEIGEN_HAS_C99_MATH)
+   add_definitions(-DTF_COMPILE_LIBRARY)
++  if(MSVC)
+   add_definitions(/bigobj /nologo /EHsc /GF /MP /Gm-)
+   # Suppress warnings to reduce build log size.
+   add_definitions(/wd4267 /wd4244 /wd4800 /wd4503 /wd4554 /wd4996 /wd4348 /wd4018)
+@@ -164,6 +165,17 @@
+   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /D_ITERATOR_DEBUG_LEVEL=0")
+   set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} /D_ITERATOR_DEBUG_LEVEL=0")
+   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /D_ITERATOR_DEBUG_LEVEL=0")
++  elseif(MINGW)
++  # Suppress warnings.
++  add_compile_options(-Wno-attributes -Wno-ignored-attributes)
++  add_compile_options(-Wno-shift-count-overflow)
++  # add_compile_options(-Wno-conversion-null)
++  # open msse
++  # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse")
++  # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse")
++  # other
++  add_definitions(-DSLEEP_FUNC_HEADER_GUARD)
++  endif()
+ 
+   # Try to avoid flaky failures due to failed generation of generate.stamp files.
+   set(CMAKE_SUPPRESS_REGENERATION ON)
+diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/double_conversion.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/double_conversion.cmake
+--- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/double_conversion.cmake	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/double_conversion.cmake	2019-01-29 19:40:27.641602200 +0800
+@@ -22,7 +22,11 @@
+ set(double_conversion_INCLUDES ${double_conversion_BUILD})
+ 
+ if(WIN32)
++  if(MINGW)
++    set(double_conversion_STATIC_LIBRARIES ${double_conversion_BUILD}/libdouble-conversion.a)
++  else()
+   set(double_conversion_STATIC_LIBRARIES ${double_conversion_BUILD}/$(Configuration)/double-conversion.lib)
++  endif()
+ else()
+   set(double_conversion_STATIC_LIBRARIES ${double_conversion_BUILD}/libdouble-conversion.a)
+ endif()
+diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/farmhash.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/farmhash.cmake
+--- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/farmhash.cmake	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/farmhash.cmake	2019-01-29 19:40:27.647602200 +0800
+@@ -25,7 +25,11 @@
+ )
+ 
+ if(WIN32)
++  if(MINGW)
++    set(farmhash_STATIC_LIBRARIES ${farmhash_INSTALL}/lib/libfarmhash.a)
++  else()
+   set(farmhash_STATIC_LIBRARIES ${farmhash_INSTALL}/lib/farmhash.lib)
++  endif()
+ 
+   ExternalProject_Add(farmhash
+       PREFIX farmhash
+@@ -59,6 +63,12 @@
+ 
+ endif()
+ 
++ExternalProject_Add_Step(farmhash patch_farmhash
++    COMMAND ${CMAKE_SOURCE_DIR}/patches/do-patch.sh farmhash "${farmhash_BUILD}"
++    DEPENDEES patch
++    DEPENDERS configure
++)
++
+ # put farmhash includes in the directory where they are expected
+ add_custom_target(farmhash_create_destination_dir
+     COMMAND ${CMAKE_COMMAND} -E make_directory ${farmhash_INCLUDE_DIR}
+diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/fft2d.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/fft2d.cmake
+--- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/fft2d.cmake	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/fft2d.cmake	2019-01-29 19:40:27.653602200 +0800
+@@ -21,7 +21,11 @@
+ set(fft2d_INSTALL ${CMAKE_CURRENT_BINARY_DIR}/fft2d/src)
+ 
+ if(WIN32)
++  if(MINGW)
++    set(fft2d_STATIC_LIBRARIES ${fft2d_BUILD}/src/lib/libfft2d.a)
++  else()
+   set(fft2d_STATIC_LIBRARIES ${fft2d_BUILD}/src/lib/fft2d.lib)
++  endif()
+ 
+   ExternalProject_Add(fft2d
+       PREFIX fft2d
+diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/gemmlowp.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/gemmlowp.cmake
+--- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/gemmlowp.cmake	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/gemmlowp.cmake	2019-01-29 19:40:27.658602200 +0800
+@@ -27,3 +27,9 @@
+     BUILD_IN_SOURCE 1
+     PATCH_COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/patches/gemmlowp/CMakeLists.txt ${gemmlowp_BUILD}
+     INSTALL_COMMAND "")
++
++ExternalProject_Add_Step(gemmlowp patch_gemmlowp
++    COMMAND ${CMAKE_SOURCE_DIR}/patches/do-patch.sh gemmlowp "${gemmlowp_BUILD}"
++    DEPENDEES patch
++    DEPENDERS configure
++)
+diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/gif.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/gif.cmake
+--- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/gif.cmake	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/gif.cmake	2019-01-29 19:40:27.663602200 +0800
+@@ -27,7 +27,11 @@
+ 
+ if(WIN32)
+ 
++  if(MINGW)
++    set(gif_STATIC_LIBRARIES ${gif_INSTALL}/lib/libgiflib.a)
++  else()
+   set(gif_STATIC_LIBRARIES ${gif_INSTALL}/lib/giflib.lib)
++  endif()
+ 
+   ExternalProject_Add(gif
+       PREFIX gif
+diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/googletest.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/googletest.cmake
+--- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/googletest.cmake	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/googletest.cmake	2019-01-29 19:40:27.668602200 +0800
+@@ -23,6 +23,9 @@
+   if(${CMAKE_GENERATOR} MATCHES "Visual Studio.*")
+     set(googletest_STATIC_LIBRARIES
+         ${CMAKE_CURRENT_BINARY_DIR}/googletest/src/googletest/googletest/$(Configuration)/gtest.lib)
++  elseif(MINGW)
++    set(googletest_STATIC_LIBRARIES
++        ${CMAKE_CURRENT_BINARY_DIR}/googletest/src/googletest/googletest/libgtest.a)
+   else()
+     set(googletest_STATIC_LIBRARIES
+         ${CMAKE_CURRENT_BINARY_DIR}/googletest/src/googletest/googletest/gtest.lib)
+diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/grpc.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/grpc.cmake
+--- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/grpc.cmake	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/grpc.cmake	2019-01-29 19:40:27.673602200 +0800
+@@ -29,6 +29,11 @@
+         ${CMAKE_CURRENT_BINARY_DIR}/grpc/src/grpc/Release/grpc++_unsecure.lib
+         ${CMAKE_CURRENT_BINARY_DIR}/grpc/src/grpc/Release/grpc_unsecure.lib
+         ${CMAKE_CURRENT_BINARY_DIR}/grpc/src/grpc/Release/gpr.lib)
++  elseif(MINGW)
++    set(grpc_STATIC_LIBRARIES
++        ${CMAKE_CURRENT_BINARY_DIR}/grpc/src/grpc/libgrpc++_unsecure.a
++        ${CMAKE_CURRENT_BINARY_DIR}/grpc/src/grpc/libgrpc_unsecure.a
++        ${CMAKE_CURRENT_BINARY_DIR}/grpc/src/grpc/libgpr.a)
+   else()
+     set(grpc_STATIC_LIBRARIES
+         ${CMAKE_CURRENT_BINARY_DIR}/grpc/src/grpc/grpc++_unsecure.lib
+@@ -76,3 +81,9 @@
+     DEPENDEES patch
+     DEPENDERS build
+ )
++
++ExternalProject_Add_Step(grpc patch_grpc
++    COMMAND ${CMAKE_SOURCE_DIR}/patches/do-patch.sh grpc "${GRPC_BUILD}"
++    DEPENDEES patch
++    DEPENDERS configure
++)
+diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/highwayhash.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/highwayhash.cmake
+--- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/highwayhash.cmake	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/highwayhash.cmake	2019-01-29 19:40:27.679602200 +0800
+@@ -30,7 +30,11 @@
+ 
+ if(WIN32)
+   set(highwayhash_HEADERS "${highwayhash_BUILD}/highwayhash/*.h")
++  if(MINGW)
++    set(highwayhash_STATIC_LIBRARIES ${highwayhash_INSTALL}/lib/libhighwayhash.a)
++  else()
+   set(highwayhash_STATIC_LIBRARIES ${highwayhash_INSTALL}/lib/highwayhash.lib)
++  endif()
+ else()
+   set(highwayhash_HEADERS "${highwayhash_BUILD}/highwayhash/*.h")
+   set(highwayhash_STATIC_LIBRARIES ${highwayhash_INSTALL}/lib/libhighwayhash.a)
+@@ -51,4 +55,4 @@
+         -DCMAKE_INSTALL_PREFIX:STRING=${highwayhash_INSTALL})
+ 
+ add_custom_command(TARGET highwayhash_copy_headers_to_destination PRE_BUILD
+-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${highwayhash_INSTALL}/include/ ${highwayhash_INCLUDE_DIR}/highwayhash)
++    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${highwayhash_HEADERS} ${highwayhash_INCLUDE_DIR}/highwayhash)
+diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/jpeg.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/jpeg.cmake
+--- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/jpeg.cmake	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/jpeg.cmake	2019-01-29 19:40:27.685602200 +0800
+@@ -21,7 +21,11 @@
+ set(jpeg_INSTALL ${CMAKE_CURRENT_BINARY_DIR}/jpeg/install)
+ 
+ if(WIN32)
++  if(MINGW)
++    set(jpeg_STATIC_LIBRARIES ${jpeg_INSTALL}/lib/liblibjpeg.a)
++  else()
+   set(jpeg_STATIC_LIBRARIES ${jpeg_INSTALL}/lib/libjpeg.lib)
++  endif()
+ else()
+   set(jpeg_STATIC_LIBRARIES ${jpeg_INSTALL}/lib/libjpeg.a)
+ endif()
+diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/jsoncpp.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/jsoncpp.cmake
+--- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/jsoncpp.cmake	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/jsoncpp.cmake	2019-01-29 19:40:27.690602200 +0800
+@@ -25,6 +25,8 @@
+ if(WIN32)
+   if(${CMAKE_GENERATOR} MATCHES "Visual Studio.*")
+     set(jsoncpp_STATIC_LIBRARIES ${jsoncpp_BUILD}/$(Configuration)/jsoncpp.lib)
++  elseif(MINGW)
++    set(jsoncpp_STATIC_LIBRARIES ${jsoncpp_BUILD}/libjsoncpp.a)
+   else()
+     set(jsoncpp_STATIC_LIBRARIES ${jsoncpp_BUILD}/jsoncpp.lib)
+   endif()
+diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/lmdb.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/lmdb.cmake
+--- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/lmdb.cmake	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/lmdb.cmake	2019-01-29 19:40:27.695602200 +0800
+@@ -21,7 +21,11 @@
+ set(lmdb_INSTALL ${CMAKE_BINARY_DIR}/lmdb/install)
+ 
+ if(WIN32)
++    if(MINGW)
++      set(lmdb_STATIC_LIBRARIES ${lmdb_INSTALL}/lib/liblmdb.a)
++    else()
+     set(lmdb_STATIC_LIBRARIES ${lmdb_INSTALL}/lib/lmdb.lib)
++    endif()
+ else()
+     set(lmdb_STATIC_LIBRARIES ${lmdb_INSTALL}/lib/liblmdb.a)
+ endif()
+diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/nsync.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/nsync.cmake
+--- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/nsync.cmake	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/nsync.cmake	2019-01-29 19:40:27.702602200 +0800
+@@ -30,7 +30,11 @@
+ 
+ if(WIN32)
+   set(nsync_HEADERS "${nsync_BUILD}/public/*.h")
++  if(MINGW)
++    set(nsync_STATIC_LIBRARIES ${nsync_INSTALL}/lib/libnsync.a)
++  else()
+   set(nsync_STATIC_LIBRARIES ${nsync_INSTALL}/lib/nsync.lib)
++  endif()
+ else()
+   set(nsync_HEADERS "${nsync_BUILD}/public/*.h")
+   set(nsync_STATIC_LIBRARIES ${nsync_INSTALL}/lib/libnsync.a)
+@@ -51,5 +55,11 @@
+         -DCMAKE_INSTALL_PREFIX:STRING=${nsync_INSTALL}
+ 	-DNSYNC_LANGUAGE:STRING=c++11)
+ 
++ExternalProject_Add_Step(nsync patch_nsync
++    COMMAND ${CMAKE_SOURCE_DIR}/patches/do-patch.sh nsync "${nsync_BUILD}"
++    DEPENDEES patch
++    DEPENDERS configure
++)
++
+ add_custom_command(TARGET nsync_copy_headers_to_destination PRE_BUILD
+-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${nsync_INSTALL}/include/ ${nsync_INCLUDE_DIR}/)
++    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${nsync_HEADERS} ${nsync_INCLUDE_DIR}/)
+diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/png.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/png.cmake
+--- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/png.cmake	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/png.cmake	2019-01-29 19:40:27.707602200 +0800
+@@ -25,6 +25,14 @@
+     set(png_STATIC_LIBRARIES 
+       debug ${CMAKE_BINARY_DIR}/png/install/lib/libpng16_staticd.lib
+       optimized ${CMAKE_BINARY_DIR}/png/install/lib/libpng16_static.lib)
++  elseif(MINGW)
++    if(CMAKE_BUILD_TYPE EQUAL Debug)
++      set(png_STATIC_LIBRARIES 
++        ${CMAKE_BINARY_DIR}/png/install/lib/libpng16d.a)
++    else()
++      set(png_STATIC_LIBRARIES 
++        ${CMAKE_BINARY_DIR}/png/install/lib/libpng16.a)
++    endif()
+   else()
+     if(CMAKE_BUILD_TYPE EQUAL Debug)
+       set(png_STATIC_LIBRARIES 
+@@ -60,6 +68,12 @@
+ 	-DZLIB_ROOT:STRING=${ZLIB_INSTALL}
+ )
+ 
++ExternalProject_Add_Step(png patch_png
++    COMMAND ${CMAKE_SOURCE_DIR}/patches/do-patch.sh png "${png_BUILD}"
++    DEPENDEES patch
++    DEPENDERS configure
++)
++
+ ## put png includes in the directory where they are expected
+ add_custom_target(png_create_destination_dir
+     COMMAND ${CMAKE_COMMAND} -E make_directory ${png_INCLUDE_DIR}
+diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/protobuf.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/protobuf.cmake
+--- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/protobuf.cmake	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/protobuf.cmake	2019-01-29 19:40:27.718602200 +0800
+@@ -24,6 +24,15 @@
+       debug ${CMAKE_CURRENT_BINARY_DIR}/protobuf/src/protobuf/$(Configuration)/libprotobufd.lib
+       optimized ${CMAKE_CURRENT_BINARY_DIR}/protobuf/src/protobuf/$(Configuration)/libprotobuf.lib)
+     set(PROTOBUF_PROTOC_EXECUTABLE ${CMAKE_CURRENT_BINARY_DIR}/protobuf/src/protobuf/$(Configuration)/protoc.exe)
++  elseif(MINGW)
++    if(CMAKE_BUILD_TYPE EQUAL Debug)
++      set(protobuf_STATIC_LIBRARIES
++        ${CMAKE_CURRENT_BINARY_DIR}/protobuf/src/protobuf/libprotobufd.a)
++    else()
++      set(protobuf_STATIC_LIBRARIES
++        ${CMAKE_CURRENT_BINARY_DIR}/protobuf/src/protobuf/libprotobuf.a)
++    endif()
++    set(PROTOBUF_PROTOC_EXECUTABLE ${CMAKE_CURRENT_BINARY_DIR}/protobuf/src/protobuf/protoc.exe)
+   else()
+     if(CMAKE_BUILD_TYPE EQUAL Debug)
+       set(protobuf_STATIC_LIBRARIES
+diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/re2.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/re2.cmake
+--- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/re2.cmake	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/re2.cmake	2019-01-29 19:40:27.723602200 +0800
+@@ -23,6 +23,8 @@
+ if(WIN32)
+   if(${CMAKE_GENERATOR} MATCHES "Visual Studio.*")
+     set(re2_STATIC_LIBRARIES ${re2_BUILD}/$(Configuration)/re2.lib)
++  elseif(MINGW)
++    set(re2_STATIC_LIBRARIES ${re2_BUILD}/libre2.a)
+   else()
+     set(re2_STATIC_LIBRARIES ${re2_BUILD}/re2.lib)
+   endif()
+diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/snappy.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/snappy.cmake
+--- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/snappy.cmake	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/snappy.cmake	2019-01-29 19:40:27.727602200 +0800
+@@ -22,6 +22,8 @@
+ if(WIN32)
+     if(${CMAKE_GENERATOR} MATCHES "Visual Studio.*")
+         set(snappy_STATIC_LIBRARIES ${snappy_BUILD}/$(Configuration)/snappy.lib)
++    elseif(MINGW)
++        set(snappy_STATIC_LIBRARIES ${snappy_BUILD}/libsnappy.a)
+     else()
+         set(snappy_STATIC_LIBRARIES ${snappy_BUILD}/snappy.lib)
+     endif()
+diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/sqlite.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/sqlite.cmake
+--- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/sqlite.cmake	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/sqlite.cmake	2019-01-29 19:40:27.732602200 +0800
+@@ -21,7 +21,11 @@
+ set(sqlite_INSTALL ${CMAKE_CURRENT_BINARY_DIR}/sqlite/install)
+ 
+ if(WIN32)
++  if(MINGW)
++    set(sqlite_STATIC_LIBRARIES ${sqlite_INSTALL}/lib/libsqlite.a)
++  else()
+   set(sqlite_STATIC_LIBRARIES ${sqlite_INSTALL}/lib/sqlite.lib)
++  endif()
+ else()
+   set(sqlite_STATIC_LIBRARIES ${sqlite_INSTALL}/lib/libsqlite.a)
+ endif()
+diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/zlib.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/zlib.cmake
+--- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/zlib.cmake	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/zlib.cmake	2019-01-29 19:40:27.737602200 +0800
+@@ -39,6 +39,14 @@
+       set(zlib_STATIC_LIBRARIES
+           debug ${CMAKE_CURRENT_BINARY_DIR}/zlib/install/lib/zlibstaticd.lib
+           optimized ${CMAKE_CURRENT_BINARY_DIR}/zlib/install/lib/zlibstatic.lib)
++    elseif(MINGW)
++      if(CMAKE_BUILD_TYPE EQUAL Debug)
++        set(zlib_STATIC_LIBRARIES
++            ${CMAKE_CURRENT_BINARY_DIR}/zlib/install/lib/libzlibstaticd.a)
++      else()
++        set(zlib_STATIC_LIBRARIES
++            ${CMAKE_CURRENT_BINARY_DIR}/zlib/install/lib/libzlibstatic.a)
++      endif()
+     else()
+       if(CMAKE_BUILD_TYPE EQUAL Debug)
+         set(zlib_STATIC_LIBRARIES
+diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/patches/gif/CMakeLists.txt tensorflow-1.10.0/tensorflow/contrib/cmake/patches/gif/CMakeLists.txt
+--- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/patches/gif/CMakeLists.txt	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/patches/gif/CMakeLists.txt	2019-01-29 19:40:27.748602200 +0800
+@@ -20,12 +20,14 @@
+ )
+ 
+ if (WIN32)
++  if(MSVC)
+   # Suppress warnings to reduce build log size.
+   add_definitions(/wd4267 /wd4244 /wd4800 /wd4503 /wd4554 /wd4996 /wd4348 /wd4018)
+   add_definitions(/wd4099 /wd4146 /wd4267 /wd4305 /wd4307)
+   add_definitions(/wd4715 /wd4722 /wd4723 /wd4838 /wd4309 /wd4334)
+   add_definitions(/wd4003 /wd4244 /wd4267 /wd4503 /wd4506 /wd4800 /wd4996)
+   add_definitions(/wd8029)
++  endif()
+ endif()
+ 
+ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/lib")
+diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/patches/jpeg/CMakeLists.txt tensorflow-1.10.0/tensorflow/contrib/cmake/patches/jpeg/CMakeLists.txt
+--- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/patches/jpeg/CMakeLists.txt	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/patches/jpeg/CMakeLists.txt	2019-01-29 19:40:27.753602200 +0800
+@@ -63,12 +63,14 @@
+ )
+ 
+ if (WIN32)
++  if(MSVC)
+   # Suppress warnings to reduce build log size.
+   add_definitions(/wd4267 /wd4244 /wd4800 /wd4503 /wd4554 /wd4996 /wd4348 /wd4018)
+   add_definitions(/wd4099 /wd4146 /wd4267 /wd4305 /wd4307)
+   add_definitions(/wd4715 /wd4722 /wd4723 /wd4838 /wd4309 /wd4334)
+   add_definitions(/wd4003 /wd4244 /wd4267 /wd4503 /wd4506 /wd4800 /wd4996)
+   add_definitions(/wd8029)
++  endif()
+ endif()
+ 
+ include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
+diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/patches/lmdb/CMakeLists.txt tensorflow-1.10.0/tensorflow/contrib/cmake/patches/lmdb/CMakeLists.txt
+--- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/patches/lmdb/CMakeLists.txt	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/patches/lmdb/CMakeLists.txt	2019-01-29 19:40:27.757602200 +0800
+@@ -13,12 +13,14 @@
+ )
+ 
+ if (WIN32)
++  if(MSVC)
+   # Suppress warnings to reduce build log size.
+   add_definitions(/wd4267 /wd4244 /wd4800 /wd4503 /wd4554 /wd4996 /wd4348 /wd4018)
+   add_definitions(/wd4099 /wd4146 /wd4267 /wd4305 /wd4307)
+   add_definitions(/wd4715 /wd4722 /wd4723 /wd4838 /wd4309 /wd4334)
+   add_definitions(/wd4003 /wd4244 /wd4267 /wd4503 /wd4506 /wd4800 /wd4996)
+   add_definitions(/wd8029)
++  endif()
+ endif()
+ 
+ include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
+diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/patches/nsync/CMakeLists.txt tensorflow-1.10.0/tensorflow/contrib/cmake/patches/nsync/CMakeLists.txt
+--- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/patches/nsync/CMakeLists.txt	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/patches/nsync/CMakeLists.txt	2019-01-29 19:40:27.762602200 +0800
+@@ -22,12 +22,14 @@
+ )
+ 
+ if (WIN32)
++  if(MSVC)
+   # Suppress warnings to reduce build log size.
+   add_definitions(/wd4267 /wd4244 /wd4800 /wd4503 /wd4554 /wd4996 /wd4348 /wd4018)
+   add_definitions(/wd4099 /wd4146 /wd4267 /wd4305 /wd4307)
+   add_definitions(/wd4715 /wd4722 /wd4723 /wd4838 /wd4309 /wd4334)
+   add_definitions(/wd4003 /wd4244 /wd4267 /wd4503 /wd4506 /wd4800 /wd4996)
+   add_definitions(/wd8029)
++  endif()
+ endif()
+ 
+ # Many of the string matches below use a literal "X" suffix on both sides.
+@@ -49,7 +51,9 @@
+   )
+   if ("${CMAKE_SYSTEM_NAME}X" STREQUAL "WindowsX")
+     include_directories ("${PROJECT_SOURCE_DIR}/platform/win32")
++    if(MSVC)
+     add_compile_options ("/TP")
++    endif()
+     set (NSYNC_OS_SRC
+       "platform/c++11/src/nsync_semaphore_mutex.cc"
+       "platform/win32/src/clock_gettime.c"
+diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/python_modules.txt tensorflow-1.10.0/tensorflow/contrib/cmake/python_modules.txt
+--- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/python_modules.txt	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/python_modules.txt	2019-01-29 19:40:27.766602200 +0800
+@@ -72,6 +72,11 @@
+ tensorflow/tools
+ tensorflow/tools/api
+ tensorflow/tools/graph_transforms
++tensorflow/compiler
++tensorflow/compiler/xla
++tensorflow/compiler/xla/rpc
++tensorflow/compiler/xla/service
++tensorflow/compiler/xla/service/gpu
+ tensorflow/contrib
+ tensorflow/contrib/all_reduce
+ tensorflow/contrib/all_reduce/python
+diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/tf_cc_ops.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/tf_cc_ops.cmake
+--- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/tf_cc_ops.cmake	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/tf_cc_ops.cmake	2019-01-29 19:40:27.771602200 +0800
+@@ -151,6 +151,8 @@
+ if (WIN32)
+   if(${CMAKE_GENERATOR} MATCHES "Visual Studio.*")
+     set (pywrap_tensorflow_lib "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/pywrap_tensorflow_internal.lib")
++  elseif(MINGW)
++    set (pywrap_tensorflow_lib "${CMAKE_CURRENT_BINARY_DIR}/libpywrap_tensorflow_internal.dll.a")
+   else()
+     set (pywrap_tensorflow_lib "${CMAKE_CURRENT_BINARY_DIR}/pywrap_tensorflow_internal.lib")
+   endif()
+@@ -186,19 +188,19 @@
+   # make sure TF_COMPILE_LIBRARY is not defined for this target
+   get_target_property(target_compile_flags  ${_AT_TARGET} COMPILE_FLAGS)
+   if(target_compile_flags STREQUAL "target_compile_flags-NOTFOUND")
+-    if (WIN32)
++    if (MSVC)
+       set(target_compile_flags "/UTF_COMPILE_LIBRARY")
+-    else (WIN32)
++    else (MSVC)
+       # gcc uses UTF as default
+       set(target_compile_flags "-finput-charset=UTF-8")
+-    endif (WIN32)
++    endif (MSVC)
+   else()
+-    if (WIN32)
++    if (MSVC)
+       set(target_compile_flags "${target_compile_flags} /UTF_COMPILE_LIBRARY")
+-    else (WIN32)
++    else (MSVC)
+       # gcc uses UTF as default
+       set(target_compile_flags "${target_compile_flags} -finput-charset=UTF-8")
+-    endif (WIN32)
++    endif (MSVC)
+   endif()
+   set_target_properties(${_AT_TARGET} PROPERTIES COMPILE_FLAGS ${target_compile_flags})
+   add_dependencies(tf_extension_ops ${_AT_TARGET})
+diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/tf_core_framework.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/tf_core_framework.cmake
+--- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/tf_core_framework.cmake	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/tf_core_framework.cmake	2019-01-29 19:40:27.775602200 +0800
+@@ -262,10 +262,14 @@
+ add_custom_target(force_rebuild_target ALL DEPENDS ${VERSION_INFO_CC})
+ add_custom_command(OUTPUT __force_rebuild COMMAND ${CMAKE_COMMAND} -E echo)
+ add_custom_command(OUTPUT
+-    ${VERSION_INFO_CC}
++    ${VERSION_INFO_CC}.tmp
+     COMMAND ${PYTHON_EXECUTABLE} ${tensorflow_source_dir}/tensorflow/tools/git/gen_git_source.py
+-    ARGS --raw_generate ${VERSION_INFO_CC} --source_dir ${tensorflow_source_dir} --git_tag_override=${GIT_TAG_OVERRIDE}
++    ARGS --raw_generate ${VERSION_INFO_CC}.tmp --source_dir ${tensorflow_source_dir} --git_tag_override=${GIT_TAG_OVERRIDE}
+     DEPENDS __force_rebuild)
++add_custom_command(OUTPUT
++    ${VERSION_INFO_CC}
++    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${VERSION_INFO_CC}.tmp ${VERSION_INFO_CC}
++    DEPENDS ${VERSION_INFO_CC}.tmp)
+ set(tf_version_srcs ${tensorflow_source_dir}/tensorflow/core/util/version_info.cc)
+ 
+ ########################################################
+diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/tf_core_kernels.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/tf_core_kernels.cmake
+--- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/tf_core_kernels.cmake	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/tf_core_kernels.cmake	2019-01-29 19:40:27.779602200 +0800
+@@ -221,7 +221,9 @@
+ add_dependencies(tf_core_kernels tf_core_cpu)
+ 
+ if (WIN32)
++  if(MSVC)
+   target_compile_options(tf_core_kernels PRIVATE /MP)
++  endif()
+ endif (WIN32)
+ if (tensorflow_ENABLE_GPU)
+   set_source_files_properties(${tf_core_gpu_kernels_srcs} PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/tf_python.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/tf_python.cmake
+--- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/tf_python.cmake	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/tf_python.cmake	2019-01-29 19:40:27.784602200 +0800
+@@ -305,7 +305,7 @@
+     # containing the wrappers.
+     add_custom_command(
+       OUTPUT ${GENERATE_PYTHON_OP_LIB_DESTINATION}
+-      COMMAND ${tf_python_op_lib_name}_gen_python ${tensorflow_source_dir}/tensorflow/core/api_def/base_api,${tensorflow_source_dir}/tensorflow/core/api_def/python_api ${require_shape_fn} > ${GENERATE_PYTHON_OP_LIB_DESTINATION}
++      COMMAND ${tf_python_op_lib_name}_gen_python /${tensorflow_source_dir}/tensorflow/core/api_def/base_api,${tensorflow_source_dir}/tensorflow/core/api_def/python_api ${require_shape_fn} > ${GENERATE_PYTHON_OP_LIB_DESTINATION}
+       DEPENDS ${tf_python_op_lib_name}_gen_python
+     )
+ 
+@@ -440,9 +440,10 @@
+ # NOTE(mrry): We always regenerate the SWIG wrapper, which means that we must
+ # always re-link the Python extension, but we don't have to track the
+ # individual headers on which the SWIG wrapper depends.
++set(PYWRAP_TENSORFLOW_INTERNAL_CC "${CMAKE_CURRENT_BINARY_DIR}/pywrap_tensorflow_internal.cc")
+ add_custom_command(
+       OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/tf_python/tensorflow/python/pywrap_tensorflow_internal.py"
+-             "${CMAKE_CURRENT_BINARY_DIR}/pywrap_tensorflow_internal.cc"
++             "${PYWRAP_TENSORFLOW_INTERNAL_CC}.tmp"
+       DEPENDS tf_python_touchup_modules __force_rebuild
+       COMMAND ${SWIG_EXECUTABLE}
+       ARGS -python -c++
+@@ -450,11 +451,15 @@
+            -I${CMAKE_CURRENT_BINARY_DIR}
+            -module pywrap_tensorflow_internal
+            -outdir ${CMAKE_CURRENT_BINARY_DIR}/tf_python/tensorflow/python
+-           -o ${CMAKE_CURRENT_BINARY_DIR}/pywrap_tensorflow_internal.cc
++           -o ${PYWRAP_TENSORFLOW_INTERNAL_CC}.tmp
+            -globals ''
+            ${tensorflow_source_dir}/tensorflow/python/tensorflow.i
+       COMMENT "Running SWIG to generate Python wrappers"
+       VERBATIM )
++add_custom_command(OUTPUT
++    ${PYWRAP_TENSORFLOW_INTERNAL_CC}
++    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PYWRAP_TENSORFLOW_INTERNAL_CC}.tmp ${PYWRAP_TENSORFLOW_INTERNAL_CC}
++    DEPENDS ${PYWRAP_TENSORFLOW_INTERNAL_CC}.tmp)
+ 
+ add_library(tf_c_python_api OBJECT
+   "${tensorflow_source_dir}/tensorflow/c/python_api.cc"
+@@ -569,7 +574,7 @@
+     math(EXPR tensorflow_target_bitness "${CMAKE_SIZEOF_VOID_P}*8")
+     add_custom_command(TARGET pywrap_tensorflow_internal_static POST_BUILD
+         COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/create_def_file.py
+-            --input "${pywrap_tensorflow_internal_static_dependencies}"
++            --input "\"${pywrap_tensorflow_internal_static_dependencies}\""
+             --output "${pywrap_tensorflow_deffile}"
+             --target _pywrap_tensorflow_internal.pyd
+             --bitness "${tensorflow_target_bitness}"
+@@ -718,6 +723,12 @@
+                                        ${CMAKE_CURRENT_BINARY_DIR}/tf_python/tensorflow/python/_pywrap_tensorflow_internal.pyd
+       COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/$(Configuration)/pywrap_tensorflow_internal.lib
+                                        ${CMAKE_CURRENT_BINARY_DIR}/tf_python/tensorflow/python/)
++  elseif(MINGW)
++    add_custom_command(TARGET pywrap_tensorflow_internal POST_BUILD
++      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/libpywrap_tensorflow_internal.dll
++                                       ${CMAKE_CURRENT_BINARY_DIR}/tf_python/tensorflow/python/_pywrap_tensorflow_internal.pyd
++      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/libpywrap_tensorflow_internal.dll.a
++                                       ${CMAKE_CURRENT_BINARY_DIR}/tf_python/tensorflow/python/)
+   else()
+     add_custom_command(TARGET pywrap_tensorflow_internal POST_BUILD
+       COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/pywrap_tensorflow_internal.dll
+@@ -773,7 +784,7 @@
+     set(PY_RUNTIME_ENV ${mkl_BIN_DIRS})
+     add_custom_command(
+           OUTPUT ${api_init_files}
+-          DEPENDS tf_python_ops tf_python_copy_scripts_to_destination pywrap_tensorflow_internal tf_python_touchup_modules tf_extension_ops
++          DEPENDS tf_python_ops tf_python_copy_scripts_to_destination pywrap_tensorflow_internal tf_python_touchup_modules tf_extension_ops __force_rebuild
+ 
+           # tensorflow/__init__.py depends on files generated in this step. So, remove it while
+           # this step is running since the files aren't there yet.
+@@ -795,7 +806,7 @@
+ else (tensorflow_ENABLE_MKL_SUPPORT)
+     add_custom_command(
+           OUTPUT ${api_init_files}
+-          DEPENDS tf_python_ops tf_python_copy_scripts_to_destination pywrap_tensorflow_internal tf_python_touchup_modules tf_extension_ops
++          DEPENDS tf_python_ops tf_python_copy_scripts_to_destination pywrap_tensorflow_internal tf_python_touchup_modules tf_extension_ops __force_rebuild
+ 
+           # tensorflow/__init__.py depends on files generated in this step. So, remove it while
+           # this step is running since the files aren't there yet.
+@@ -845,7 +856,7 @@
+ # Run create_python_api.py to generate __init__.py files.
+ add_custom_command(
+       OUTPUT ${api_init_files}
+-      DEPENDS tf_python_ops tf_python_copy_scripts_to_destination pywrap_tensorflow_internal tf_python_touchup_modules tf_extension_ops
++      DEPENDS tf_python_ops tf_python_copy_scripts_to_destination pywrap_tensorflow_internal tf_python_touchup_modules tf_extension_ops __force_rebuild
+ 
+       # Run create_python_api.py to generate API init files.
+       COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/tf_python ${PYTHON_EXECUTABLE}
+@@ -982,21 +993,21 @@
+ if(${tensorflow_TF_NIGHTLY})
+   if(${tensorflow_ENABLE_GPU})
+     add_custom_command(TARGET tf_python_build_pip_package POST_BUILD
+-      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/tf_python/setup.py bdist_wheel --project_name tf_nightly_gpu
++      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/tf_python/setup.py --quiet bdist_wheel --project_name tf_nightly_gpu
+       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/tf_python)
+   else()
+     add_custom_command(TARGET tf_python_build_pip_package POST_BUILD
+-      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/tf_python/setup.py bdist_wheel --project_name tf_nightly
++      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/tf_python/setup.py --quiet bdist_wheel --project_name tf_nightly
+       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/tf_python)
+   endif(${tensorflow_ENABLE_GPU})
+ else()
+   if(${tensorflow_ENABLE_GPU})
+     add_custom_command(TARGET tf_python_build_pip_package POST_BUILD
+-      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/tf_python/setup.py bdist_wheel --project_name tensorflow_gpu
++      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/tf_python/setup.py --quiet bdist_wheel --project_name tensorflow_gpu
+       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/tf_python)
+   else()
+     add_custom_command(TARGET tf_python_build_pip_package POST_BUILD
+-      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/tf_python/setup.py bdist_wheel
++      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/tf_python/setup.py --quiet bdist_wheel
+       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/tf_python)
+   endif(${tensorflow_ENABLE_GPU})
+ endif(${tensorflow_TF_NIGHTLY})
+diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/tools/create_def_file.py tensorflow-1.10.0/tensorflow/contrib/cmake/tools/create_def_file.py
+--- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/tools/create_def_file.py	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/tools/create_def_file.py	2019-01-29 19:40:27.789602200 +0800
+@@ -107,13 +107,13 @@
+   candidates = []
+   tmpfile = tempfile.NamedTemporaryFile(mode="w", delete=False)
+   for lib_path in args.input:
+-    proc = subprocess.Popen([DUMPBIN, "/nologo", "/linkermember:1", lib_path],
++    proc = subprocess.Popen(["nm", "--extern-only", "--defined-only", lib_path],
+                             stdout=subprocess.PIPE)
+     for line in codecs.getreader("utf-8")(proc.stdout):
+       cols = line.split()
+-      if len(cols) < 2:
++      if len(cols) < 3:
+         continue
+-      sym = cols[1]
++      sym = cols[2]
+       tmpfile.file.write(sym + "\n")
+       candidates.append(sym)
+     exit_code = proc.wait()
+@@ -131,15 +131,15 @@
+     # Header for the def file.
+     def_fp.write("LIBRARY " + args.target + "\n")
+     def_fp.write("EXPORTS\n")
+-    if args.bitness == "64":
+-      def_fp.write("\t??1OpDef@tensorflow@@UEAA@XZ\n")
+-    else:
+-      def_fp.write("\t??1OpDef@tensorflow@@UAE@XZ\n")
++    # if args.bitness == "64":
++      # def_fp.write("\t??1OpDef@tensorflow@@UEAA@XZ\n")
++    # else:
++      # def_fp.write("\t??1OpDef@tensorflow@@UAE@XZ\n")
+ 
+     # Each symbols returned by undname matches the same position in candidates.
+     # We compare on undname but use the decorated name from candidates.
+     dupes = 0
+-    proc = subprocess.Popen([UNDNAME, tmpfile.name], stdout=subprocess.PIPE)
++    proc = subprocess.Popen(["c++filt", "@%s"%tmpfile.name], stdout=subprocess.PIPE)
+     for idx, line in enumerate(codecs.getreader("utf-8")(proc.stdout)):
+       decorated = candidates[idx]
+       if decorated in taken:
+@@ -159,10 +159,11 @@
+         # So we filter out such symbols here.
+         continue
+ 
++      is_64bits = sys.maxsize > 2**32
+       if DATA_EXCLUDE_RE.search(line):
+-        def_fp.write("\t" + decorated + "\n")
++        def_fp.write("\t" + (decorated if is_64bits else decorated[1:]) + "\n")
+       else:
+-        def_fp.write("\t" + decorated + " DATA\n")
++        def_fp.write("\t" + (decorated if is_64bits else decorated[1:]) + " DATA\n")
+       taken.add(decorated)
+   exit_code = proc.wait()
+   if exit_code != 0:
