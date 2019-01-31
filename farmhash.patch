@@ -1,5 +1,25 @@
---- "farmhash.orig/src\\farmhash.cc"	2019-01-26 18:21:59.097602200 +0800
-+++ "farmhash/src\\farmhash.cc"	2019-01-29 21:01:34.119602200 +0800
+--- "farmhash.orig/src\\farmhash.h"	2017-09-14 04:13:37.000000000 +0800
++++ "farmhash/src\\farmhash.h"	2019-01-31 10:12:22.839000000 +0800
+@@ -305,6 +305,8 @@
+   #if !defined(FARMHASH_BIG_ENDIAN)
+     #define FARMHASH_BIG_ENDIAN
+   #endif
++#elif defined(_WIN32)
++  // Windows is (currently) little-endian
+ #elif defined(__linux__) || defined(__CYGWIN__) || defined( __GNUC__ ) || defined( __GNU_LIBRARY__ )
+   #include <endian.h> // libc6-dev, GLIBC
+   #if BYTE_ORDER == BIG_ENDIAN
+@@ -319,8 +321,6 @@
+       #define FARMHASH_BIG_ENDIAN
+     #endif
+   #endif
+-#elif defined(_WIN32)
+-  // Windows is (currently) little-endian
+ #else
+   #error "Unable to determine endianness!"
+ #endif /* __BIG_ENDIAN__ */
+--- "farmhash.orig/src\\farmhash.cc"	2017-09-14 04:13:37.000000000 +0800
++++ "farmhash/src\\farmhash.cc"	2019-01-31 08:27:02.866000000 +0800
 @@ -114,7 +114,7 @@
  
  #if defined(FARMHASH_UNKNOWN_ENDIAN) || !defined(bswap_64)

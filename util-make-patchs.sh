@@ -29,7 +29,7 @@ function make_patch() {
 make_patch grpc 'include/grpc/impl/codegen/port_platform.h'
 make_patch nsync 'platform/win32/platform_c++11_os.h'
 make_patch png 'CMakeLists.txt'
-make_patch farmhash 'src\farmhash.cc'
+make_patch farmhash 'src\farmhash.h' 'src\farmhash.cc'
 make_patch gemmlowp 'internal\platform.h'
 
 cd $BASE_PATH/src
