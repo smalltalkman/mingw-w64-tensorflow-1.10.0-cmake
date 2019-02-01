@@ -20,7 +20,8 @@ source=(${_archive}.tar.gz::https://github.com/tensorflow/tensorflow/archive/v${
         nsync.patch
         png.patch
         farmhash.patch
-        gemmlowp.patch)
+        gemmlowp.patch
+        downloads.tar.gz)
 sha256sums=('EE9CB98D9E0D8106F2F4ED52A38FE89399324AF303E1401567E5B64A9F86744B'
             '90BEC93008E111B2878382788EA5E3209308532BC7C56CF0F34335404CF9787A'
             '2B18F1FE58888F7271A42B04C01C1384A03D90B322B1BF352C8D03ACA62F3B59'
@@ -30,7 +31,8 @@ sha256sums=('EE9CB98D9E0D8106F2F4ED52A38FE89399324AF303E1401567E5B64A9F86744B'
             '7EC822C85E9BE3EBD1B864CA1A8D88230A8AD77B800A80646F36C3EC75BB11BC'
             '6511B4EB2051FB4E1EC868C35556ACE1F6AC0474475B4E09C9AB3CB40AF30EAC'
             '71FD21B7C1B2F49F785BBE4530537E39A9BAD78A7074EFA802B84FCA8117B532'
-            '132DB40B994F932695BE8B2D6B54026B1956F2789FAE22CE9E28B79CE8B31956')
+            '132DB40B994F932695BE8B2D6B54026B1956F2789FAE22CE9E28B79CE8B31956'
+            '56C8223245C8E5DCE17D0B1E47EDA13BF946146958DDD7BF5973B69BB1188C69')
 
 _mock=('mock' 'pbr' 'funcsigs')
 _deps=('protobuf' 'absl-py' '${_mock[@]}' 'wheel')
@@ -85,6 +87,7 @@ prepare() {
 build() {
   cd "${srcdir}"
   mkdir -p cmake_build && cd cmake_build
+  bsdtar -xf ${srcdir}/downloads.tar.gz
   # find . -type f -name '*-patch' -delete
   # make clean
   # rm -f CMakeCache.txt
