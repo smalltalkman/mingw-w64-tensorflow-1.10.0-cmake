@@ -180,6 +180,16 @@ package_python2-tensorflow() {
   install -Dm644 ${srcdir}/${_archive}/LICENSE "${pkgdir}${MINGW_PREFIX}/share/licenses/python2-${_realname}/LICENSE"
 }
 
+package_mingw-w64-i686-python2-tensorflow() {
+  install=${CARCH}-python2-${_realname}.install
+  package_python2-${_realname}
+}
+
+package_mingw-w64-i686-python3-tensorflow() {
+  install=${CARCH}-python3-${_realname}.install
+  package_python3-${_realname}
+}
+
 package_mingw-w64-x86_64-python2-tensorflow() {
   install=${CARCH}-python2-${_realname}.install
   package_python2-${_realname}
