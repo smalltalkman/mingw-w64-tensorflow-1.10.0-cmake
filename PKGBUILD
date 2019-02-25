@@ -37,7 +37,6 @@ noextract=(downloads.tar.gz)
 
 _mock=('mock' 'pbr' 'funcsigs')
 _deps=('numpy' 'protobuf' 'absl-py' ${_mock[@]} 'wheel')
-# depends=()
 makedepends=("git"
              "patch"
              "${MINGW_PACKAGE_PREFIX}-cmake"
@@ -70,11 +69,6 @@ prepare() {
     0003-fix-tensorflow-__init__.py.patch
   cp -up ${srcdir}/{grpc,nsync,png,farmhash,gemmlowp}.patch tensorflow/contrib/cmake/patches
   cp -up ${srcdir}/do-patch.sh tensorflow/contrib/cmake/patches
-  # if [ ! -d .git ]; then
-  #   git init
-  #   git add .
-  #   git commit -m "init"
-  # fi
 }
 
 build() {
@@ -105,7 +99,6 @@ build() {
   
   # make tf_build_all_tests
   # make test
-  # make tf_python_build_pip_package/fast
 }
 
 package() {
