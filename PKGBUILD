@@ -36,7 +36,7 @@ sha256sums=('EE9CB98D9E0D8106F2F4ED52A38FE89399324AF303E1401567E5B64A9F86744B'
 noextract=(downloads.tar.gz)
 
 _mock=('mock' 'pbr' 'funcsigs')
-_deps=('protobuf' 'absl-py' '${_mock[@]}' 'wheel')
+_deps=('numpy' 'protobuf' 'absl-py' ${_mock[@]} 'wheel')
 depends=()
 makedepends=("git"
              "patch"
@@ -128,7 +128,7 @@ package() {
 }
 
 package_python3-tensorflow() {
-  depends=("${MINGW_PACKAGE_PREFIX}-python3")
+  depends=("${MINGW_PACKAGE_PREFIX}-python3" "${_deps[@]/#/${MINGW_PACKAGE_PREFIX}-python3-}")
 
   local _mingw_prefix=$(cygpath -am ${MINGW_PREFIX})
 
@@ -156,7 +156,7 @@ package_python3-tensorflow() {
 }
 
 package_python2-tensorflow() {
-  depends=("${MINGW_PACKAGE_PREFIX}-python2")
+  depends=("${MINGW_PACKAGE_PREFIX}-python2" "${_deps[@]/#/${MINGW_PACKAGE_PREFIX}-python2-}")
 
   cd "${srcdir}/cmake_build/python2-build"
   MSYS2_ARG_CONV_EXCL="--prefix=;--install-scripts=;--install-platlib=" \
