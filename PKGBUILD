@@ -37,27 +37,19 @@ noextract=(downloads.tar.gz)
 
 _mock=('mock' 'pbr' 'funcsigs')
 _deps=('numpy' 'protobuf' 'absl-py' ${_mock[@]} 'wheel')
-depends=()
+# depends=()
 makedepends=("git"
              "patch"
              "${MINGW_PACKAGE_PREFIX}-cmake"
              "make"
              "${MINGW_PACKAGE_PREFIX}-gcc"
-             "${MINGW_PACKAGE_PREFIX}-python2-numpy"
-             "${MINGW_PACKAGE_PREFIX}-python3-numpy"
-             "${MINGW_PACKAGE_PREFIX}-swig"
-             "${MINGW_PACKAGE_PREFIX}-python2-protobuf"
-             "${MINGW_PACKAGE_PREFIX}-python3-protobuf"
-             "${MINGW_PACKAGE_PREFIX}-python2-absl-py"
-             "${MINGW_PACKAGE_PREFIX}-python3-absl-py"
-             "${MINGW_PACKAGE_PREFIX}-python2-mock"
-             "${MINGW_PACKAGE_PREFIX}-python3-mock"
-             "${MINGW_PACKAGE_PREFIX}-python2-pbr"
-             "${MINGW_PACKAGE_PREFIX}-python3-pbr"
-             "${MINGW_PACKAGE_PREFIX}-python2-funcsigs"
-             "${MINGW_PACKAGE_PREFIX}-python3-funcsigs"
-             "${MINGW_PACKAGE_PREFIX}-python2-wheel"
-             "${MINGW_PACKAGE_PREFIX}-python3-wheel")
+             ${_deps[@]/#/${MINGW_PACKAGE_PREFIX}-python2-}
+             ${_deps[@]/#/${MINGW_PACKAGE_PREFIX}-python3-}
+             "${MINGW_PACKAGE_PREFIX}-swig")
+_deps2='absl-py, astor, gast, numpy, six, protobuf, setuptools, tensorboard, termcolor, grpcio, wheel, mock, backports.weakref, enum34'
+_deps2=(${_deps2//,/ })
+_deps3='absl-py, astor, gast, numpy, six, protobuf, setuptools, tensorboard, termcolor, grpcio, wheel'
+_deps3=(${_deps3//,/ })
 
 # Helper macros to help make tasks easier #
 apply_patch_with_msg() {
@@ -128,7 +120,7 @@ package() {
 }
 
 package_python3-tensorflow() {
-  depends=("${MINGW_PACKAGE_PREFIX}-python3" "${_deps[@]/#/${MINGW_PACKAGE_PREFIX}-python3-}")
+  depends=("${MINGW_PACKAGE_PREFIX}-python3" "${_deps3[@]/#/${MINGW_PACKAGE_PREFIX}-python3-}")
 
   local _mingw_prefix=$(cygpath -am ${MINGW_PREFIX})
 
@@ -156,7 +148,7 @@ package_python3-tensorflow() {
 }
 
 package_python2-tensorflow() {
-  depends=("${MINGW_PACKAGE_PREFIX}-python2" "${_deps[@]/#/${MINGW_PACKAGE_PREFIX}-python2-}")
+  depends=("${MINGW_PACKAGE_PREFIX}-python2" "${_deps2[@]/#/${MINGW_PACKAGE_PREFIX}-python2-}")
 
   cd "${srcdir}/cmake_build/python2-build"
   MSYS2_ARG_CONV_EXCL="--prefix=;--install-scripts=;--install-platlib=" \
