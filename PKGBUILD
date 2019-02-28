@@ -45,10 +45,8 @@ makedepends=("git"
              ${_deps[@]/#/${MINGW_PACKAGE_PREFIX}-python2-}
              ${_deps[@]/#/${MINGW_PACKAGE_PREFIX}-python3-}
              "${MINGW_PACKAGE_PREFIX}-swig")
-_deps2='absl-py, astor, gast, numpy, six, protobuf, setuptools, tensorboard, termcolor, grpcio, wheel, mock, backports.weakref, enum34'
-_deps2=(${_deps2//,/ })
-_deps3='absl-py, astor, gast, numpy, six, protobuf, setuptools, tensorboard, termcolor, grpcio, wheel'
-_deps3=(${_deps3//,/ })
+_deps2=(absl-py astor gast numpy six protobuf setuptools termcolor grpcio wheel mock backports.weakref enum34) # tensorboard
+_deps3=(absl-py astor gast numpy six protobuf setuptools termcolor grpcio wheel)                               # tensorboard
 
 # Helper macros to help make tasks easier #
 apply_patch_with_msg() {
