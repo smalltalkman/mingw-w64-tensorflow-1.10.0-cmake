@@ -2,7 +2,7 @@
 
 _realname=tensorflow
 pkgbase=mingw-w64-${_realname}
-pkgname=("${MINGW_PACKAGE_PREFIX}-python2-${_realname}" "${MINGW_PACKAGE_PREFIX}-python3-${_realname}")
+pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}" "${MINGW_PACKAGE_PREFIX}-python2-${_realname}" "${MINGW_PACKAGE_PREFIX}-python3-${_realname}")
 pkgver=1.10.0
 pkgrel=1
 pkgdesc="Open source software library for numerical computation using data flow graphs. (mingw-w64)"
@@ -55,7 +55,7 @@ apply_patch_with_msg() {
   for _patch in "$@"
   do
     msg2 "Applying ${_patch}"
-    patch -N -b -p1 -i "${srcdir}/${_patch}"
+    patch -Nbp1 -i "${srcdir}/${_patch}"
   done
 }
 
@@ -106,15 +106,13 @@ build() {
   # make test
 }
 
-package() {
-  exit
-  cd "${srcdir}/tensorflow-${pkgver}"
-  cd cmake_build
+package_tensorflow() {
+  cd "${srcdir}/python3-build"
+  
   # make install/fast
   cmake -DCMAKE_INSTALL_PREFIX:PATH="${pkgdir}${MINGW_PREFIX}" -P cmake_install.cmake
-  # cd tf_python
-  # MSYS2_ARG_CONV_EXCL="--prefix=;--install-scripts=;--install-platlib=" \
-  #   python setup.py --quiet install --prefix=${MINGW_PREFIX} --root="${pkgdir}" --optimize=1
+
+  install -Dm644 ${srcdir}/${_archive}/LICENSE "${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}/LICENSE"
 }
 
 package_python3-tensorflow() {
@@ -169,6 +167,14 @@ package_python2-tensorflow() {
   done
 
   install -Dm644 ${srcdir}/${_archive}/LICENSE "${pkgdir}${MINGW_PREFIX}/share/licenses/python2-${_realname}/LICENSE"
+}
+
+package_mingw-w64-i686-tensorflow() {
+  package_${_realname}
+}
+
+package_mingw-w64-x86_64-tensorflow() {
+  package_${_realname}
 }
 
 package_mingw-w64-i686-python2-tensorflow() {
