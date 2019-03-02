@@ -1,0 +1,45 @@
+diff -ur -x '*.orig' tensorflow-1.10.0.orig/tensorflow/python/eager/pywrap_tfe_src.cc tensorflow-1.10.0/tensorflow/python/eager/pywrap_tfe_src.cc
+--- tensorflow-1.10.0.orig/tensorflow/python/eager/pywrap_tfe_src.cc	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/python/eager/pywrap_tfe_src.cc	2019-03-01 21:56:08.638629600 +0800
+@@ -216,7 +216,7 @@
+ #if PY_MAJOR_VERSION >= 3
+   if (PyUnicode_Check(py_value)) {
+     Py_ssize_t size = 0;
+-    char* buf = PyUnicode_AsUTF8AndSize(py_value, &size);
++    const char* buf = PyUnicode_AsUTF8AndSize(py_value, &size);
+     if (buf == nullptr) return false;
+     *value = tensorflow::StringPiece(buf, size);
+     return true;
+@@ -831,7 +831,7 @@
+   }
+ #if PY_MAJOR_VERSION >= 3
+   if (PyUnicode_Check(o)) {
+-    return PyUnicode_AsUTF8(o);
++    return const_cast<char*>(PyUnicode_AsUTF8(o));
+   }
+ #endif
+   return nullptr;
+diff -ur -x '*.orig' tensorflow-1.10.0.orig/tensorflow/python/lib/core/ndarray_tensor.cc tensorflow-1.10.0/tensorflow/python/lib/core/ndarray_tensor.cc
+--- tensorflow-1.10.0.orig/tensorflow/python/lib/core/ndarray_tensor.cc	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/python/lib/core/ndarray_tensor.cc	2019-03-01 22:10:16.562128000 +0800
+@@ -154,7 +154,7 @@
+     if (PyUnicode_Check(item.get())) {
+ #if PY_VERSION_HEX >= 0x03030000
+       // Accept unicode by converting to UTF-8 bytes.
+-      ptr = PyUnicode_AsUTF8AndSize(item.get(), &len);
++      ptr = const_cast<char*>(PyUnicode_AsUTF8AndSize(item.get(), &len));
+       if (!ptr) {
+         return errors::Internal("Unable to get element as UTF-8.");
+       }
+diff -ur -x '*.orig' tensorflow-1.10.0.orig/tensorflow/python/lib/core/py_func.cc tensorflow-1.10.0/tensorflow/python/lib/core/py_func.cc
+--- tensorflow-1.10.0.orig/tensorflow/python/lib/core/py_func.cc	2018-08-08 07:52:04.000000000 +0800
++++ tensorflow-1.10.0/tensorflow/python/lib/core/py_func.cc	2019-03-01 22:22:02.436501700 +0800
+@@ -352,7 +352,7 @@
+         Py_ssize_t el_size;
+         if (PyBytes_AsStringAndSize(input_data[i], &el, &el_size) == -1) {
+ #if PY_MAJOR_VERSION >= 3
+-          el = PyUnicode_AsUTF8AndSize(input_data[i], &el_size);
++          el = const_cast<char*>(PyUnicode_AsUTF8AndSize(input_data[i], &el_size));
+ #else
+           el = nullptr;
+           if (PyUnicode_Check(input_data[i])) {

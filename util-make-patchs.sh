@@ -35,6 +35,7 @@ make_patch gemmlowp 'internal\platform.h'
 cd $BASE_PATH/src
 diff -ur tensorflow-$TF_VERSION.orig/tensorflow/contrib/cmake tensorflow-$TF_VERSION/tensorflow/contrib/cmake -x '*.patch' -x '*.orig' | grep -vi '^Only in' > $BASE_PATH/0001-fix-tensorflow-contrib-cmake.patch
 diff -ur tensorflow-$TF_VERSION.orig/tensorflow/core          tensorflow-$TF_VERSION/tensorflow/core                       -x '*.orig' | grep -vi '^Only in' > $BASE_PATH/0002-fix-tensorflow-core.patch
+diff -ur tensorflow-$TF_VERSION.orig/tensorflow/python        tensorflow-$TF_VERSION/tensorflow/python                     -x '*.orig' | grep -vi '^Only in' > $BASE_PATH/0004-fix-tensorflow-python.patch
 
 function make_patch_for_file() {
   local base_dir=$1

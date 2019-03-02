@@ -15,6 +15,7 @@ source=(${_archive}.tar.gz::https://github.com/tensorflow/tensorflow/archive/v${
         0001-fix-tensorflow-contrib-cmake.patch
         0002-fix-tensorflow-core.patch
         0003-fix-tensorflow-__init__.py.patch
+        0004-fix-tensorflow-python.patch
         do-patch.sh
         grpc.patch
         nsync.patch
@@ -26,6 +27,7 @@ sha256sums=('EE9CB98D9E0D8106F2F4ED52A38FE89399324AF303E1401567E5B64A9F86744B'
             '90BEC93008E111B2878382788EA5E3209308532BC7C56CF0F34335404CF9787A'
             '2B18F1FE58888F7271A42B04C01C1384A03D90B322B1BF352C8D03ACA62F3B59'
             '202D181ABE517B5FB75EEA687EF63679B9A974AE425D9818AF81513B9DFA2541'
+            '7F16CFC07CFF6FA7EF3BAF70B1BBDAFF564436567CE9B8D85E47927363422D84'
             'C8A80F51ECF5BC8DABD6F8D2017377CA9F155E0FCC07E2B4018FEE713401E2D0'
             '245D8BF7DBA8E93C3C158C797BD30FA374BFBCE28EB1FE3A045094C33CC3B7A2'
             '7EC822C85E9BE3EBD1B864CA1A8D88230A8AD77B800A80646F36C3EC75BB11BC'
@@ -64,34 +66,39 @@ prepare() {
   apply_patch_with_msg \
     0001-fix-tensorflow-contrib-cmake.patch \
     0002-fix-tensorflow-core.patch \
-    0003-fix-tensorflow-__init__.py.patch
+    0003-fix-tensorflow-__init__.py.patch \
+    0004-fix-tensorflow-python.patch
   cp -up ${srcdir}/{grpc,nsync,png,farmhash,gemmlowp}.patch tensorflow/contrib/cmake/patches
   cp -up ${srcdir}/do-patch.sh tensorflow/contrib/cmake/patches
 }
 
 build() {
   cd "${srcdir}"
-  mkdir -p cmake_build && cd cmake_build
-  bsdtar -xf ${srcdir}/downloads.tar.gz
-  # find . -type f -name '*-patch' -delete
-  # make clean
-  # rm -f CMakeCache.txt
-  ${MINGW_PREFIX}/bin/cmake -G "MSYS Makefiles" \
-        -Dtensorflow_BUILD_SHARED_LIB=OFF \
-        -Dtensorflow_BUILD_CC_EXAMPLE=ON \
-        -Dtensorflow_BUILD_CC_TESTS=OFF \
-        -Dtensorflow_BUILD_PYTHON_BINDINGS=ON \
-        -Dtensorflow_BUILD_PYTHON_TESTS=OFF \
-        ../${_archive}/tensorflow/contrib/cmake
-  make -sj1 all
-  make -sj1 tf_python_build_pip_package
   
   rm -rf python{2,3}-build
   for builddir in python{2,3}-build; do
     msg2 "Building for ${CARCH} ${builddir%-build} ..."
-    cp -r tf_python ${builddir}
+    mkdir -p ${builddir}
     pushd $builddir
-    ${MINGW_PREFIX}/bin/${builddir%-build} setup.py --quiet build
+    
+    rm -rf ${srcdir}/${_archive}/{api_init_files_list.txt,estimator_api_init_files_list.txt}
+    rm -rf ${srcdir}/${_archive}/tensorflow/core/util/version_info.cc{,.tmp}
+    
+    bsdtar -xf ${srcdir}/downloads.tar.gz
+    # find . -type f -name '*-patch' -delete
+    # make clean
+    # rm -f CMakeCache.txt
+    ${MINGW_PREFIX}/bin/cmake -G "MSYS Makefiles" \
+          -Dtensorflow_BUILD_SHARED_LIB=OFF \
+          -Dtensorflow_BUILD_CC_EXAMPLE=ON \
+          -Dtensorflow_BUILD_CC_TESTS=OFF \
+          -Dtensorflow_BUILD_PYTHON_BINDINGS=ON \
+          -Dtensorflow_BUILD_PYTHON_TESTS=OFF \
+          -DPYTHON_EXECUTABLE=${MINGW_PREFIX}/bin/${builddir%-build} \
+          ../${_archive}/tensorflow/contrib/cmake
+    make -sj1 all
+    make -sj1 tf_python_build_pip_package
+    
     popd
   done
   
@@ -115,7 +122,7 @@ package_python3-tensorflow() {
 
   local _mingw_prefix=$(cygpath -am ${MINGW_PREFIX})
 
-  cd "${srcdir}/cmake_build/python3-build"
+  cd "${srcdir}/python3-build/tf_python"
   MSYS2_ARG_CONV_EXCL="--prefix=;--install-scripts=;--install-platlib=" \
     ${MINGW_PREFIX}/bin/python3 setup.py --quiet install --prefix=${MINGW_PREFIX} --root="${pkgdir}" -O1
 
@@ -141,7 +148,7 @@ package_python3-tensorflow() {
 package_python2-tensorflow() {
   depends=("${MINGW_PACKAGE_PREFIX}-python2" "${_deps2[@]/#/${MINGW_PACKAGE_PREFIX}-python2-}")
 
-  cd "${srcdir}/cmake_build/python2-build"
+  cd "${srcdir}/python2-build/tf_python"
   MSYS2_ARG_CONV_EXCL="--prefix=;--install-scripts=;--install-platlib=" \
     ${MINGW_PREFIX}/bin/python2 setup.py --quiet install --prefix=${MINGW_PREFIX} --root="${pkgdir}" -O1
 
