@@ -1,9 +1,12 @@
 #!/bin/bash
 BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+cmake_build_dir=$1
+cmake_build_dir=${cmake_build_dir:-cmake_build}
+
 TF_VERSION=1.10.0
 PATCHES_PATH=$BASE_PATH/src/tensorflow-$TF_VERSION/tensorflow/contrib/cmake/patches
-CMAKE_BUILD=$BASE_PATH/src/cmake_build
+CMAKE_BUILD=$BASE_PATH/src/$cmake_build_dir
 
 function make_patch() {
   local params=("$@")
