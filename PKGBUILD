@@ -24,7 +24,7 @@ source=(${_archive}.tar.gz::https://github.com/tensorflow/tensorflow/archive/v${
         gemmlowp.patch
         downloads.tar.gz)
 sha256sums=('EE9CB98D9E0D8106F2F4ED52A38FE89399324AF303E1401567E5B64A9F86744B'
-            '009F5F8820481906785365A10F907ABEB501B50003F4418E9FD041E4436C1037'
+            '17CBEE172F9B374B485556F947D803C6E7C174F400A7A78E92E046A9ADCDAB1C'
             '2B18F1FE58888F7271A42B04C01C1384A03D90B322B1BF352C8D03ACA62F3B59'
             '202D181ABE517B5FB75EEA687EF63679B9A974AE425D9818AF81513B9DFA2541'
             '7F16CFC07CFF6FA7EF3BAF70B1BBDAFF564436567CE9B8D85E47927363422D84'
@@ -75,19 +75,22 @@ prepare() {
 build() {
   cd "${srcdir}"
   
-  rm -rf python{2,3}-build
+  # rm -rf python{2,3}-build
   for builddir in python{2,3}-build; do
     msg2 "Building for ${CARCH} ${builddir%-build} ..."
     mkdir -p ${builddir}
     pushd $builddir
     
     rm -rf ${srcdir}/${_archive}/{api_init_files_list.txt,estimator_api_init_files_list.txt}
-    rm -rf ${srcdir}/${_archive}/tensorflow/core/util/version_info.cc{,.tmp}
+    # rm -rf ${srcdir}/${_archive}/tensorflow/core/util/version_info.cc{,.tmp}
     
     bsdtar -xf ${srcdir}/downloads.tar.gz
     # find . -type f -name '*-patch' -delete
     # make clean
     # rm -f CMakeCache.txt
+    
+    rm -rf tf_python
+    
     ${MINGW_PREFIX}/bin/cmake -G "MSYS Makefiles" \
           -Dtensorflow_BUILD_SHARED_LIB=OFF \
           -Dtensorflow_BUILD_CC_EXAMPLE=ON \
@@ -96,8 +99,15 @@ build() {
           -Dtensorflow_BUILD_PYTHON_TESTS=OFF \
           -DPYTHON_EXECUTABLE=${MINGW_PREFIX}/bin/${builddir%-build} \
           ../${_archive}/tensorflow/contrib/cmake
-    make -sj1 all
+    # make -sj1 all
     make -sj1 tf_python_build_pip_package
+    
+    #--- test commands when fail ---
+    # rm -rf tf_python \
+    # && cmake . \
+    # && if [ -f libpywrap_tensorflow_internal.dll   ]; then cp libpywrap_tensorflow_internal.dll   tf_python/tensorflow/python/_pywrap_tensorflow_internal.pyd; fi \
+    # && if [ -f libpywrap_tensorflow_internal.dll.a ]; then cp libpywrap_tensorflow_internal.dll.a tf_python/tensorflow/python/; fi \
+    # && make -sj1 tf_python_build_pip_package
     
     popd
   done

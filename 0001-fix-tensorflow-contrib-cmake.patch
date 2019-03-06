@@ -1,6 +1,6 @@
 diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/CMakeLists.txt tensorflow-1.10.0/tensorflow/contrib/cmake/CMakeLists.txt
 --- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/CMakeLists.txt	2018-08-08 07:52:04.000000000 +0800
-+++ tensorflow-1.10.0/tensorflow/contrib/cmake/CMakeLists.txt	2019-03-01 10:10:02.938413200 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/CMakeLists.txt	2019-03-05 08:35:41.020804200 +0800
 @@ -149,6 +149,7 @@
    add_definitions(-DWIN32 -DOS_WIN -D_MBCS -DWIN32_LEAN_AND_MEAN -DNOGDI -DPLATFORM_WINDOWS)
    add_definitions(-DTENSORFLOW_USE_EIGEN_THREADPOOL -DEIGEN_HAS_C99_MATH)
@@ -29,7 +29,7 @@ diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmak
    set(CMAKE_SUPPRESS_REGENERATION ON)
 diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/double_conversion.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/double_conversion.cmake
 --- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/double_conversion.cmake	2018-08-08 07:52:04.000000000 +0800
-+++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/double_conversion.cmake	2019-03-01 10:10:02.969613200 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/double_conversion.cmake	2019-03-05 08:35:41.024804200 +0800
 @@ -22,7 +22,11 @@
  set(double_conversion_INCLUDES ${double_conversion_BUILD})
  
@@ -44,7 +44,7 @@ diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmak
  endif()
 diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/farmhash.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/farmhash.cmake
 --- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/farmhash.cmake	2018-08-08 07:52:04.000000000 +0800
-+++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/farmhash.cmake	2019-03-01 10:10:02.985213300 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/farmhash.cmake	2019-03-05 08:35:41.030804200 +0800
 @@ -25,7 +25,11 @@
  )
  
@@ -72,7 +72,7 @@ diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmak
      COMMAND ${CMAKE_COMMAND} -E make_directory ${farmhash_INCLUDE_DIR}
 diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/fft2d.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/fft2d.cmake
 --- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/fft2d.cmake	2018-08-08 07:52:04.000000000 +0800
-+++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/fft2d.cmake	2019-03-01 10:10:03.000813300 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/fft2d.cmake	2019-03-05 08:35:41.035804200 +0800
 @@ -21,7 +21,11 @@
  set(fft2d_INSTALL ${CMAKE_CURRENT_BINARY_DIR}/fft2d/src)
  
@@ -87,7 +87,7 @@ diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmak
        PREFIX fft2d
 diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/gemmlowp.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/gemmlowp.cmake
 --- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/gemmlowp.cmake	2018-08-08 07:52:04.000000000 +0800
-+++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/gemmlowp.cmake	2019-03-01 10:10:03.000813300 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/gemmlowp.cmake	2019-03-05 08:35:41.040804200 +0800
 @@ -27,3 +27,9 @@
      BUILD_IN_SOURCE 1
      PATCH_COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/patches/gemmlowp/CMakeLists.txt ${gemmlowp_BUILD}
@@ -100,7 +100,7 @@ diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmak
 +)
 diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/gif.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/gif.cmake
 --- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/gif.cmake	2018-08-08 07:52:04.000000000 +0800
-+++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/gif.cmake	2019-03-01 10:10:03.063213400 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/gif.cmake	2019-03-05 08:35:41.044804200 +0800
 @@ -27,7 +27,11 @@
  
  if(WIN32)
@@ -115,7 +115,7 @@ diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmak
        PREFIX gif
 diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/googletest.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/googletest.cmake
 --- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/googletest.cmake	2018-08-08 07:52:04.000000000 +0800
-+++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/googletest.cmake	2019-03-01 10:10:03.125613500 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/googletest.cmake	2019-03-05 08:35:41.049804200 +0800
 @@ -23,6 +23,9 @@
    if(${CMAKE_GENERATOR} MATCHES "Visual Studio.*")
      set(googletest_STATIC_LIBRARIES
@@ -128,7 +128,7 @@ diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmak
          ${CMAKE_CURRENT_BINARY_DIR}/googletest/src/googletest/googletest/gtest.lib)
 diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/grpc.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/grpc.cmake
 --- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/grpc.cmake	2018-08-08 07:52:04.000000000 +0800
-+++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/grpc.cmake	2019-03-01 10:10:03.141213500 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/grpc.cmake	2019-03-05 08:35:41.054804200 +0800
 @@ -29,6 +29,11 @@
          ${CMAKE_CURRENT_BINARY_DIR}/grpc/src/grpc/Release/grpc++_unsecure.lib
          ${CMAKE_CURRENT_BINARY_DIR}/grpc/src/grpc/Release/grpc_unsecure.lib
@@ -153,7 +153,7 @@ diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmak
 +)
 diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/highwayhash.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/highwayhash.cmake
 --- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/highwayhash.cmake	2018-08-08 07:52:04.000000000 +0800
-+++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/highwayhash.cmake	2019-03-01 10:10:03.156813600 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/highwayhash.cmake	2019-03-05 08:35:41.060804200 +0800
 @@ -30,7 +30,11 @@
  
  if(WIN32)
@@ -174,7 +174,7 @@ diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmak
 +    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${highwayhash_HEADERS} ${highwayhash_INCLUDE_DIR}/highwayhash)
 diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/jpeg.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/jpeg.cmake
 --- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/jpeg.cmake	2018-08-08 07:52:04.000000000 +0800
-+++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/jpeg.cmake	2019-03-01 10:10:03.219213700 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/jpeg.cmake	2019-03-05 08:35:41.064804200 +0800
 @@ -21,7 +21,11 @@
  set(jpeg_INSTALL ${CMAKE_CURRENT_BINARY_DIR}/jpeg/install)
  
@@ -189,7 +189,7 @@ diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmak
  endif()
 diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/jsoncpp.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/jsoncpp.cmake
 --- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/jsoncpp.cmake	2018-08-08 07:52:04.000000000 +0800
-+++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/jsoncpp.cmake	2019-03-01 10:10:03.250413700 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/jsoncpp.cmake	2019-03-05 08:35:41.068804200 +0800
 @@ -25,6 +25,8 @@
  if(WIN32)
    if(${CMAKE_GENERATOR} MATCHES "Visual Studio.*")
@@ -201,7 +201,7 @@ diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmak
    endif()
 diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/lmdb.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/lmdb.cmake
 --- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/lmdb.cmake	2018-08-08 07:52:04.000000000 +0800
-+++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/lmdb.cmake	2019-03-01 10:10:03.266013800 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/lmdb.cmake	2019-03-05 08:35:41.072804200 +0800
 @@ -21,7 +21,11 @@
  set(lmdb_INSTALL ${CMAKE_BINARY_DIR}/lmdb/install)
  
@@ -216,7 +216,7 @@ diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmak
  endif()
 diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/nsync.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/nsync.cmake
 --- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/nsync.cmake	2018-08-08 07:52:04.000000000 +0800
-+++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/nsync.cmake	2019-03-01 10:10:03.312813800 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/nsync.cmake	2019-03-05 08:35:41.077804200 +0800
 @@ -30,7 +30,11 @@
  
  if(WIN32)
@@ -244,7 +244,7 @@ diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmak
 +    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${nsync_HEADERS} ${nsync_INCLUDE_DIR}/)
 diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/png.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/png.cmake
 --- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/png.cmake	2018-08-08 07:52:04.000000000 +0800
-+++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/png.cmake	2019-03-01 10:10:03.312813800 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/png.cmake	2019-03-05 08:35:41.084804200 +0800
 @@ -25,6 +25,14 @@
      set(png_STATIC_LIBRARIES 
        debug ${CMAKE_BINARY_DIR}/png/install/lib/libpng16_staticd.lib
@@ -275,7 +275,7 @@ diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmak
      COMMAND ${CMAKE_COMMAND} -E make_directory ${png_INCLUDE_DIR}
 diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/protobuf.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/protobuf.cmake
 --- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/protobuf.cmake	2018-08-08 07:52:04.000000000 +0800
-+++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/protobuf.cmake	2019-03-01 10:10:03.328413900 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/protobuf.cmake	2019-03-05 08:35:41.092804200 +0800
 @@ -24,6 +24,15 @@
        debug ${CMAKE_CURRENT_BINARY_DIR}/protobuf/src/protobuf/$(Configuration)/libprotobufd.lib
        optimized ${CMAKE_CURRENT_BINARY_DIR}/protobuf/src/protobuf/$(Configuration)/libprotobuf.lib)
@@ -294,7 +294,7 @@ diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmak
        set(protobuf_STATIC_LIBRARIES
 diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/re2.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/re2.cmake
 --- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/re2.cmake	2018-08-08 07:52:04.000000000 +0800
-+++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/re2.cmake	2019-03-01 10:10:03.344013900 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/re2.cmake	2019-03-05 08:35:41.097804200 +0800
 @@ -23,6 +23,8 @@
  if(WIN32)
    if(${CMAKE_GENERATOR} MATCHES "Visual Studio.*")
@@ -306,7 +306,7 @@ diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmak
    endif()
 diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/snappy.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/snappy.cmake
 --- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/snappy.cmake	2018-08-08 07:52:04.000000000 +0800
-+++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/snappy.cmake	2019-03-01 10:10:03.359613900 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/snappy.cmake	2019-03-05 08:35:41.103804200 +0800
 @@ -22,6 +22,8 @@
  if(WIN32)
      if(${CMAKE_GENERATOR} MATCHES "Visual Studio.*")
@@ -318,7 +318,7 @@ diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmak
      endif()
 diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/sqlite.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/sqlite.cmake
 --- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/sqlite.cmake	2018-08-08 07:52:04.000000000 +0800
-+++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/sqlite.cmake	2019-03-01 10:10:03.375213900 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/sqlite.cmake	2019-03-05 08:35:41.112804200 +0800
 @@ -21,7 +21,11 @@
  set(sqlite_INSTALL ${CMAKE_CURRENT_BINARY_DIR}/sqlite/install)
  
@@ -333,7 +333,7 @@ diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmak
  endif()
 diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/zlib.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/external/zlib.cmake
 --- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/external/zlib.cmake	2018-08-08 07:52:04.000000000 +0800
-+++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/zlib.cmake	2019-03-01 10:10:03.422014000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/external/zlib.cmake	2019-03-05 08:35:41.117804200 +0800
 @@ -39,6 +39,14 @@
        set(zlib_STATIC_LIBRARIES
            debug ${CMAKE_CURRENT_BINARY_DIR}/zlib/install/lib/zlibstaticd.lib
@@ -351,7 +351,7 @@ diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmak
          set(zlib_STATIC_LIBRARIES
 diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/patches/gif/CMakeLists.txt tensorflow-1.10.0/tensorflow/contrib/cmake/patches/gif/CMakeLists.txt
 --- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/patches/gif/CMakeLists.txt	2018-08-08 07:52:04.000000000 +0800
-+++ tensorflow-1.10.0/tensorflow/contrib/cmake/patches/gif/CMakeLists.txt	2019-03-01 10:10:03.422014000 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/patches/gif/CMakeLists.txt	2019-03-05 08:35:41.125804200 +0800
 @@ -20,12 +20,14 @@
  )
  
@@ -369,7 +369,7 @@ diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmak
  include_directories("${CMAKE_CURRENT_SOURCE_DIR}/lib")
 diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/patches/jpeg/CMakeLists.txt tensorflow-1.10.0/tensorflow/contrib/cmake/patches/jpeg/CMakeLists.txt
 --- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/patches/jpeg/CMakeLists.txt	2018-08-08 07:52:04.000000000 +0800
-+++ tensorflow-1.10.0/tensorflow/contrib/cmake/patches/jpeg/CMakeLists.txt	2019-03-01 10:10:03.437614100 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/patches/jpeg/CMakeLists.txt	2019-03-05 08:35:41.130804200 +0800
 @@ -63,12 +63,14 @@
  )
  
@@ -387,7 +387,7 @@ diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmak
  include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/patches/lmdb/CMakeLists.txt tensorflow-1.10.0/tensorflow/contrib/cmake/patches/lmdb/CMakeLists.txt
 --- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/patches/lmdb/CMakeLists.txt	2018-08-08 07:52:04.000000000 +0800
-+++ tensorflow-1.10.0/tensorflow/contrib/cmake/patches/lmdb/CMakeLists.txt	2019-03-01 10:10:03.453214100 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/patches/lmdb/CMakeLists.txt	2019-03-05 08:35:41.135804200 +0800
 @@ -13,12 +13,14 @@
  )
  
@@ -405,7 +405,7 @@ diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmak
  include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/patches/nsync/CMakeLists.txt tensorflow-1.10.0/tensorflow/contrib/cmake/patches/nsync/CMakeLists.txt
 --- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/patches/nsync/CMakeLists.txt	2018-08-08 07:52:04.000000000 +0800
-+++ tensorflow-1.10.0/tensorflow/contrib/cmake/patches/nsync/CMakeLists.txt	2019-03-01 10:10:03.468814100 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/patches/nsync/CMakeLists.txt	2019-03-05 08:35:41.141804200 +0800
 @@ -22,12 +22,14 @@
  )
  
@@ -433,7 +433,7 @@ diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmak
        "platform/win32/src/clock_gettime.c"
 diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/python_modules.txt tensorflow-1.10.0/tensorflow/contrib/cmake/python_modules.txt
 --- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/python_modules.txt	2018-08-08 07:52:04.000000000 +0800
-+++ tensorflow-1.10.0/tensorflow/contrib/cmake/python_modules.txt	2019-03-01 10:10:03.500014200 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/python_modules.txt	2019-03-05 08:35:41.146804200 +0800
 @@ -72,6 +72,11 @@
  tensorflow/tools
  tensorflow/tools/api
@@ -448,7 +448,7 @@ diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmak
  tensorflow/contrib/all_reduce/python
 diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/tf_cc_ops.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/tf_cc_ops.cmake
 --- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/tf_cc_ops.cmake	2018-08-08 07:52:04.000000000 +0800
-+++ tensorflow-1.10.0/tensorflow/contrib/cmake/tf_cc_ops.cmake	2019-03-01 10:10:03.515614200 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/tf_cc_ops.cmake	2019-03-05 08:35:41.151804200 +0800
 @@ -151,6 +151,8 @@
  if (WIN32)
    if(${CMAKE_GENERATOR} MATCHES "Visual Studio.*")
@@ -486,7 +486,7 @@ diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmak
    add_dependencies(tf_extension_ops ${_AT_TARGET})
 diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/tf_core_framework.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/tf_core_framework.cmake
 --- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/tf_core_framework.cmake	2018-08-08 07:52:04.000000000 +0800
-+++ tensorflow-1.10.0/tensorflow/contrib/cmake/tf_core_framework.cmake	2019-03-01 10:10:03.531214200 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/tf_core_framework.cmake	2019-03-05 08:35:41.156804200 +0800
 @@ -262,10 +262,14 @@
  add_custom_target(force_rebuild_target ALL DEPENDS ${VERSION_INFO_CC})
  add_custom_command(OUTPUT __force_rebuild COMMAND ${CMAKE_COMMAND} -E echo)
@@ -506,7 +506,7 @@ diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmak
  ########################################################
 diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/tf_core_kernels.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/tf_core_kernels.cmake
 --- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/tf_core_kernels.cmake	2018-08-08 07:52:04.000000000 +0800
-+++ tensorflow-1.10.0/tensorflow/contrib/cmake/tf_core_kernels.cmake	2019-03-01 10:10:03.546814200 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/tf_core_kernels.cmake	2019-03-05 08:35:41.160804200 +0800
 @@ -221,7 +221,9 @@
  add_dependencies(tf_core_kernels tf_core_cpu)
  
@@ -519,7 +519,7 @@ diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmak
    set_source_files_properties(${tf_core_gpu_kernels_srcs} PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
 diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/tf_python.cmake tensorflow-1.10.0/tensorflow/contrib/cmake/tf_python.cmake
 --- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/tf_python.cmake	2018-08-08 07:52:04.000000000 +0800
-+++ tensorflow-1.10.0/tensorflow/contrib/cmake/tf_python.cmake	2019-03-02 14:07:15.165077300 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/tf_python.cmake	2019-03-05 14:16:30.491804200 +0800
 @@ -305,7 +305,7 @@
      # containing the wrappers.
      add_custom_command(
@@ -581,33 +581,6 @@ diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmak
    else()
      add_custom_command(TARGET pywrap_tensorflow_internal POST_BUILD
        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/pywrap_tensorflow_internal.dll
-@@ -773,7 +785,7 @@
-     set(PY_RUNTIME_ENV ${mkl_BIN_DIRS})
-     add_custom_command(
-           OUTPUT ${api_init_files}
--          DEPENDS tf_python_ops tf_python_copy_scripts_to_destination pywrap_tensorflow_internal tf_python_touchup_modules tf_extension_ops
-+          DEPENDS tf_python_ops tf_python_copy_scripts_to_destination pywrap_tensorflow_internal tf_python_touchup_modules tf_extension_ops __force_rebuild
- 
-           # tensorflow/__init__.py depends on files generated in this step. So, remove it while
-           # this step is running since the files aren't there yet.
-@@ -795,7 +807,7 @@
- else (tensorflow_ENABLE_MKL_SUPPORT)
-     add_custom_command(
-           OUTPUT ${api_init_files}
--          DEPENDS tf_python_ops tf_python_copy_scripts_to_destination pywrap_tensorflow_internal tf_python_touchup_modules tf_extension_ops
-+          DEPENDS tf_python_ops tf_python_copy_scripts_to_destination pywrap_tensorflow_internal tf_python_touchup_modules tf_extension_ops __force_rebuild
- 
-           # tensorflow/__init__.py depends on files generated in this step. So, remove it while
-           # this step is running since the files aren't there yet.
-@@ -845,7 +857,7 @@
- # Run create_python_api.py to generate __init__.py files.
- add_custom_command(
-       OUTPUT ${api_init_files}
--      DEPENDS tf_python_ops tf_python_copy_scripts_to_destination pywrap_tensorflow_internal tf_python_touchup_modules tf_extension_ops
-+      DEPENDS tf_python_ops tf_python_copy_scripts_to_destination pywrap_tensorflow_internal tf_python_touchup_modules tf_extension_ops __force_rebuild
- 
-       # Run create_python_api.py to generate API init files.
-       COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/tf_python ${PYTHON_EXECUTABLE}
 @@ -982,21 +994,21 @@
  if(${tensorflow_TF_NIGHTLY})
    if(${tensorflow_ENABLE_GPU})
@@ -636,7 +609,7 @@ diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmak
  endif(${tensorflow_TF_NIGHTLY})
 diff -ur -x '*.patch' -x '*.orig' tensorflow-1.10.0.orig/tensorflow/contrib/cmake/tools/create_def_file.py tensorflow-1.10.0/tensorflow/contrib/cmake/tools/create_def_file.py
 --- tensorflow-1.10.0.orig/tensorflow/contrib/cmake/tools/create_def_file.py	2018-08-08 07:52:04.000000000 +0800
-+++ tensorflow-1.10.0/tensorflow/contrib/cmake/tools/create_def_file.py	2019-03-01 10:10:03.609214400 +0800
++++ tensorflow-1.10.0/tensorflow/contrib/cmake/tools/create_def_file.py	2019-03-05 08:35:41.173804200 +0800
 @@ -107,13 +107,13 @@
    candidates = []
    tmpfile = tempfile.NamedTemporaryFile(mode="w", delete=False)
